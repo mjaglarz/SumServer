@@ -3,7 +3,7 @@ TCP server summing numbers in C
 ## ENG An extract from the protocol details:
 * Communication between client and server is based on a connection-oriented TCP protocol.
 * Client sends one or more lines containing numbers. For every line ended with carriage return and line feed ("\r\n"), server returns a line with a single number - the sum of added values or an error message ("ERROR\r\n").
-* Line can only contain digits and spaces (number terminators). Numbers must be separated with one space. Line can't be empty, can't start or end with a space.
+* Line can only contain digits and spaces (number separators). Numbers must be separated with one space. Line can't be empty, can't start or end with a space.
 
 ## Implementation details:
 * Server is listening on port 2019.
