@@ -10,7 +10,7 @@
 
 #define MAX_SIZE 2048
 
-void message(int sockfd){ //Funkcja wypisująca klientowi komunikat o błędzie.
+void message(int sockfd){ 																										
 	char error[] = "ERROR\r\n";
 	int bytesWritten = write(sockfd, &error, sizeof(error) - 1);
 	if(bytesWritten == -1){
@@ -19,19 +19,19 @@ void message(int sockfd){ //Funkcja wypisująca klientowi komunikat o błędzie.
 	}
 }
 
-size_t intToString(char *string, int number){ //Funkcja konwertująca int na string.
-	char *ptr = string; //Ustawiam wskaźnik na obecną pozycję w łańcuchu znaków.
-  int value = number; //Zapisuję do zmiennej value wartość podaną jako argument funkcji.
+size_t intToString(char *string, int number){ 												
+	char *ptr = string; 
+  int value = number;
 
-  do{ //Konwertuję liczbę na pojedyncze cyfry.
+  do{ 
   	*ptr = value % 10 + '0';
 		ptr++;
     value /= 10;
   }while(value);
 
-	size_t writtenCharacters = ptr - string; //Zapisuję liczbę zapisanych znaków.
+	size_t writtenCharacters = ptr - string; 
 
-  while(--ptr > string){ //Odwracam kolejność cyfr w zapisie dziesiętnym.
+  while(--ptr > string){ 
   	char temp = *string;
     *string = *ptr;
 		string++;
@@ -45,7 +45,7 @@ void chat(int sockfd){
 	char buffer[MAX_SIZE];
 	memset(&buffer, 0, sizeof(buffer));
 
-	int bufferSize = 0; //Aktualny rozmiar bufora (po usuwaniu kolejnych linii).
+	int bufferSize = 0; 
 	while(1){
 		int bytesRead = read(sockfd, buffer, sizeof(buffer));
 		if(bytesRead == -1){
@@ -53,29 +53,25 @@ void chat(int sockfd){
 		  exit(1);
 		}
 
-		//Jeśli odczytano dane za pomocą funkcji read, przypisuję do bufferSize liczbę odczytanych bajtów.
 		if(bytesRead != 0){
 			bufferSize = bytesRead;
 		}
 
-		//Jeśli rozmiar bufora jest równy zero, przerywam odczytywanie danych.
 		if(bufferSize == 0){
 			break;
 		}
 
-		int lastElement; //Ostatni element przed znakiem powrotu karetki.
-		bool correctLine = false; //Do sprawdzenia czy w buforze jest poprawna linia.
+		int lastElement; 
+		bool correctLine = false; 
 		for(int i = 0; i < bufferSize && correctLine == false; ++i){
-			//Sprawdzam czy w buforze jest znak powrotu karetki i kolejny indeks nie wychodzi poza bufor.
 			if((buffer[i] == '\r') && (i+1 != bufferSize)){
-				if(buffer[i+1] == '\n'){ //Sprawdzam czy w kolejnej komórce bufora jest znak końca linii.
+				if(buffer[i+1] == '\n'){ 
 					lastElement = i;
 					correctLine = true;
 				}
 			}
 		}
 
-		//Jeśli w buforze nie ma poprawnej linii, opróżniam bufor i przechodzę do kolejnego odczytania danych z bufora.
 		if(correctLine == false){
 			memset(&buffer, 0, sizeof(buffer));
 			bufferSize = 0;
@@ -83,7 +79,6 @@ void chat(int sockfd){
 			continue;
 		}
 
-		//Linia jest pusta, przesuwam elementy w buforze i przechodzę do kolejnego odczytania danych za pomocą funkcji read.
 		if(lastElement == 0){
 			memmove(buffer, buffer + 2, bufferSize - 2);
 			bufferSize = bufferSize - 2;
@@ -91,8 +86,6 @@ void chat(int sockfd){
 			continue;
 		}
 
-		//Jeżeli pierwszy lub ostatni element w linii to spacja, przesuwam elementy w buforze
-		//i przechodzę do kolejnego odczytania danych za pomocą funkcji read.
 		if(buffer[0] == ' ' || buffer[lastElement-1] == ' '){
 			memmove(buffer, buffer + lastElement + 2, bufferSize - lastElement - 2);
 			bufferSize = bufferSize - lastElement - 2;
@@ -101,21 +94,18 @@ void chat(int sockfd){
 		}
 
 		for(int i = 0; i < lastElement && correctLine == true; ++i){
-			//Sprawdzam czy w tablicy jest znak spacji i kolejny indeks nie wychodzi poza linię.
 			if(buffer[i] == 32 && i+1 != lastElement){
-				if(buffer[i+1] == 32){ //Sprawdzam czy w kolejnej komórce bufora jest znak spacji.
+				if(buffer[i+1] == 32){ 
 					correctLine = false;
 					continue;
 				}
 			}
 
-			//Sprawdzam czy w tablicy są znaki, które nie są spacjami i nie są cyframi.
 			if((buffer[i] < 48 && buffer[i] != 32) || buffer[i] > 57){
 				correctLine = false;
 			}
 		}
 
-		//Jeśli linia jest niepoprawna, przesuwam elementy w buforze i przechodzę do kolejnego odczytania danych za pomocą funkcji read.
 		if(correctLine == false){
 			memmove(buffer, buffer + lastElement + 2, bufferSize - lastElement - 2);
 			bufferSize = bufferSize - lastElement - 2;
@@ -123,21 +113,21 @@ void chat(int sockfd){
 			continue;
 		}
 
-		char string[lastElement+1]; //Tworzę string o rozmiarze lastElement plus jeden ze względu na bajt równy zero.
+		char string[lastElement+1];
 		strncpy(string, buffer, lastElement);
 		string[lastElement] = '\0';
 
 		int sum = 0;
-		char *token = strtok(string, " "); //Dzielę string na tokeny.
-		bool convsersionError = false; //Do sprawdzenia czy nie wystąpił błąd podczas konwersji tokenu.
+		char *token = strtok(string, " "); 
+		bool convsersionError = false; 
 		while(token != NULL && convsersionError == false){
 			errno = 0;
-			long number = strtol(token, (char**)NULL, 10); //Konwertuję token na long.
-			if(errno != 0 || number > INT_MAX){ //Sprawdzam czy podana liczba jest poprawna i czy mieści się w wartości int.
+			long number = strtol(token, (char**)NULL, 10); 
+			if(errno != 0 || number > INT_MAX){ 
 				convsersionError = true;
 				break;
 			}
-			//Sprawdzam czy po dodaniu kolejnej liczby nie nastąpi overflow.
+
 			if(sum <= INT_MAX - number){
 				sum += number;
 			}else{
@@ -147,8 +137,6 @@ void chat(int sockfd){
 			token = strtok(NULL, " ");
 		}
 
-		//Jeśli nastąpił błąd podczas konwersji, przesuwam elementy w buforze
-		//i przechodzę do kolejnego odczytania danych za pomocą funkcji read.
 		if(convsersionError){
 			memmove(buffer, buffer + lastElement + 2, bufferSize - lastElement - 2);
 			bufferSize = bufferSize - lastElement - 2;
@@ -166,7 +154,6 @@ void chat(int sockfd){
 			exit(1);
 		}
 
-		//Jeżeli w buforze znajdują się jeszcze elementy to je przesuwam.
 		if(lastElement + 2 != bufferSize){
 			memmove(buffer, buffer + lastElement + 2, bufferSize - lastElement - 2);
 			bufferSize = bufferSize - lastElement - 2;
