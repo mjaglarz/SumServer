@@ -144,7 +144,7 @@ void chat(int sockfd){
 			continue;
 		}
 
-		size_t writtenCharacters = intToString(string, sum); //Konwertuję sumę na string.
+		size_t writtenCharacters = intToString(string, sum); 
 		string[writtenCharacters] = '\r';
 		string[writtenCharacters+1] = '\n';
 
